@@ -1,0 +1,7 @@
+1001|Electronics|Smart Watch|2500.000000|-42|
+1002|Clothing|T-Shirt|700.000000|26|
+1003|Grocery|Basmati Rice 1kg|85.000000|114|
+1004|Electronics|Wireless Earbuds|1999.000000|26|
+1005|Clothing|Jeans|1499.000000|62|
+1006|Grocery|Olive Oil 1L|650.000000|91|
+1007|Grocery|apple|40.000000|10|

@@ -1,0 +1,3 @@
+Anjali|anjali@example.com|c5d2460186f7233c927e7db2dcc703c0|USER|||
+Admin|admin@shop.com|c5d2460186f7233c927e7db2dcc703c0|ADMIN|||
+Anjali|apr121206%40gmail.com||USER|||

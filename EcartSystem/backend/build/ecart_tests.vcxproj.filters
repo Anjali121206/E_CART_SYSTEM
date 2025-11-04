@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\ANJALI RATHI\OneDrive\Documents\project-bolt-sb1-ji99ml92\project\EcartSystem\backend\tests\dummy_tests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\ANJALI RATHI\OneDrive\Documents\project-bolt-sb1-ji99ml92\project\EcartSystem\backend\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{BB2D6A7C-219B-32E3-8680-87E7D5BA608D}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
