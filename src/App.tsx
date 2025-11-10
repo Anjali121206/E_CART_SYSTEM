@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import { Plus, Minus, Trash2, ArrowLeft } from 'lucide-react';
 
@@ -9,30 +9,6 @@ type CartItemType = {
   quantity: number;
   image: string;
 };
-
-const initialCartItems = [
-  {
-    id: 1,
-    name: 'Classic C++ Textbook',
-    price: 59.99,
-    quantity: 1,
-    image: 'https://placehold.co/100x100/e2e8f0/334155?text=C++ Book',
-  },
-  {
-    id: 2,
-    name: 'OOP Design Patterns',
-    price: 45.5,
-    quantity: 1,
-    image: 'https://placehold.co/100x100/e2e8f0/334155?text=OOP Book',
-  },
-  {
-    id: 3,
-    name: 'Data Structures in C++',
-    price: 65.0,
-    quantity: 2,
-    image: 'https://placehold.co/100x100/e2e8f0/334155?text=Data Structures',
-  },
-];
 
 const SHIPPING_COST = 5.0;
 
@@ -162,29 +138,37 @@ function PaymentPage({
   );
 }
 
-function CartPage() {
-  const [cartItems, setCartItems] = useState<CartItemType[]>(initialCartItems);
-
-  const handleQuantityChange = (id: number, delta: number) => {
-    setCartItems((prevItems) =>
-      prevItems
-        .map((item) =>
-          item.id === id
-            ? { ...item, quantity: item.quantity + delta }
-            : item
-        )
-        .filter((item) => item.quantity > 0)
+function CartPage({
+  cartItems,
+  loading,
+  error,
+  handleQuantityChange,
+  handleRemoveItem,
+  subtotal,
+}: {
+  cartItems: CartItemType[];
+  loading: boolean;
+  error: string | null;
+  handleQuantityChange: (id: number, delta: number) => void;
+  handleRemoveItem: (id: number) => void;
+  subtotal: number;
+}) {
+  if (loading) {
+    return (
+      <div className="bg-gray-100 min-h-screen py-8 text-center">
+        <h1 className="text-2xl font-semibold">Loading...</h1>
+      </div>
     );
-  };
+  }
 
-  const handleRemoveItem = (id: number) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
-  };
-  
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  if (error) {
+    return (
+      <div className="bg-gray-100 min-h-screen py-8 text-center">
+        <h1 className="text-2xl font-semibold text-red-500">Error: {error}</h1>
+        <p>Please make sure the backend server is running.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-100 min-h-screen py-8">
@@ -232,9 +216,52 @@ function CartPage() {
 }
 
 function App() {
-  // In a real app, cart state would be managed globally (e.g., with Context or Redux)
-  // For simplicity, we'll pass it down for now.
-  const [cartItems] = useState<CartItemType[]>(initialCartItems);
+  const [cartItems, setCartItems] = useState<CartItemType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/products');
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
+        }
+        const products = await response.json();
+        const fetchedCartItems = products.map((product: any) => ({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          quantity: 1,
+          image: `https://placehold.co/100x100/e2e8f0/334155?text=${product.name.replace(/\s/g, '+')}`,
+        }));
+        setCartItems(fetchedCartItems);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const handleQuantityChange = (id: number, delta: number) => {
+    setCartItems((prevItems) =>
+      prevItems
+        .map((item) =>
+          item.id === id
+            ? { ...item, quantity: item.quantity + delta }
+            : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
+  };
+
+  const handleRemoveItem = (id: number) => {
+    setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
+  };
+
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
@@ -242,7 +269,19 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<CartPage />} />
+      <Route
+        path="/"
+        element={
+          <CartPage
+            cartItems={cartItems}
+            loading={loading}
+            error={error}
+            handleQuantityChange={handleQuantityChange}
+            handleRemoveItem={handleRemoveItem}
+            subtotal={subtotal}
+          />
+        }
+      />
       <Route
         path="/payment"
         element={<PaymentPage cartItems={cartItems} subtotal={subtotal} />}
