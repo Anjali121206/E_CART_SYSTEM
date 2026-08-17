@@ -1,5 +1,5 @@
-1001|Electronics|Smart Watch|2500.000000|-45|
-1002|Clothing|T-Shirt|700.000000|23|
+1001|Electronics|Smart Watch|2500.000000|-47|
+1002|Clothing|T-Shirt|700.000000|22|
 1003|Grocery|Basmati Rice 1kg|85.000000|110|
 1004|Electronics|Wireless Earbuds|1999.000000|25|
 1005|Clothing|Jeans|1499.000000|62|

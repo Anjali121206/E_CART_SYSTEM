@@ -1,7 +1,0 @@
-C:/Users/ANJALI RATHI/Downloads/ecart/E_CART_SYSTEM/EcartSystem/backend/build/CMakeFiles/ecart_core.dir
-C:/Users/ANJALI RATHI/Downloads/ecart/E_CART_SYSTEM/EcartSystem/backend/build/CMakeFiles/ecart.dir
-C:/Users/ANJALI RATHI/Downloads/ecart/E_CART_SYSTEM/EcartSystem/backend/build/CMakeFiles/ecart_tests.dir
-C:/Users/ANJALI RATHI/Downloads/ecart/E_CART_SYSTEM/EcartSystem/backend/build/CMakeFiles/ecart_server.dir
-C:/Users/ANJALI RATHI/Downloads/ecart/E_CART_SYSTEM/EcartSystem/backend/build/CMakeFiles/RUN_TESTS.dir
-C:/Users/ANJALI RATHI/Downloads/ecart/E_CART_SYSTEM/EcartSystem/backend/build/CMakeFiles/ALL_BUILD.dir
-C:/Users/ANJALI RATHI/Downloads/ecart/E_CART_SYSTEM/EcartSystem/backend/build/CMakeFiles/ZERO_CHECK.dir

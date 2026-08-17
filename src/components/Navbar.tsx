@@ -1,132 +1,189 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { ShoppingCart, Heart, User, LogOut, Menu, X, Search } from 'lucide-react';
+import { useCart } from '../contexts/CartContext';
+import { ShoppingBag, Heart, User, LogOut, Menu, X, Search, ShieldAlert, Sparkles } from 'lucide-react';
 
-type NavbarProps = {
-  cartCount: number;
-  wishlistCount: number;
-  onSearch: (query: string) => void;
-};
-
-export function Navbar({ cartCount, wishlistCount, onSearch }: NavbarProps) {
-  const { user, isLoggedIn, logout } = useAuth();
+export function Navbar() {
+  const { user, isLoggedIn, isAdmin, logout } = useAuth();
+  const { cartItems, wishlistItems } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [userDropdown, setUserDropdown] = useState(false);
   const navigate = useNavigate();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch(searchQuery);
-    navigate('/');
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setMobileMenuOpen(false);
+    }
   };
 
   const handleLogout = () => {
     logout();
+    setUserDropdown(false);
     navigate('/login');
   };
 
+  const totalCartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center py-4">
-          {/* Logo */}
-          <Link to="/" className="text-2xl font-bold text-blue-600">
-            E-Cart
+    <nav className="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-xs">
+      <div className="container mx-auto px-4 max-w-7xl">
+        <div className="flex justify-between items-center h-20">
+          {/* Brand Logo */}
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/25 group-hover:scale-105 transition-transform duration-300">
+              <ShoppingBag size={22} />
+            </div>
+            <div>
+              <span className="text-2xl font-black tracking-tight text-slate-900 flex items-center gap-1">
+                E-Cart<span className="text-blue-600">.</span>
+              </span>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest -mt-1 hidden sm:block">
+                Ultra Fast Store
+              </p>
+            </div>
           </Link>
 
+          {/* Quick Nav Links (Desktop) */}
+          <div className="hidden lg:flex items-center gap-6 text-sm font-bold text-slate-600">
+            <Link to="/" className="hover:text-blue-600 transition">
+              Home
+            </Link>
+            <Link to="/search" className="hover:text-blue-600 transition flex items-center gap-1">
+              Shop All
+            </Link>
+            <Link to="/cart" className="hover:text-blue-600 transition flex items-center gap-1">
+              <Sparkles size={15} className="text-amber-500" /> Offers & Cart
+            </Link>
+            <Link to="/orders" className="hover:text-blue-600 transition">
+              Track Order
+            </Link>
+          </div>
+
           {/* Search Bar (Desktop) */}
-          <form onSubmit={handleSearch} className="hidden md:flex flex-1 mx-8">
+          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-6">
             <div className="w-full relative">
+              <Search size={18} className="absolute left-3.5 top-3 text-slate-400" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Search products, brands, groceries..."
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none focus:bg-white transition"
               />
-              <button
-                type="submit"
-                className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
-              >
-                <Search size={20} />
-              </button>
             </div>
           </form>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
-            {isLoggedIn && (
-              <div className="flex items-center gap-4">
-                <Link
-                  to="/wishlist"
-                  className="relative flex items-center text-gray-700 hover:text-blue-600 transition"
+          {/* Desktop Right Nav: Wishlist, Cart, User */}
+          <div className="hidden md:flex items-center gap-4">
+            {/* Wishlist Icon */}
+            <Link
+              to="/wishlist"
+              className="relative p-2.5 rounded-2xl text-slate-600 hover:text-red-500 hover:bg-slate-50 transition"
+              title="My Wishlist"
+            >
+              <Heart size={22} />
+              {wishlistItems.length > 0 && (
+                <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-extrabold rounded-full w-5 h-5 flex items-center justify-center border-2 border-white shadow-sm">
+                  {wishlistItems.length}
+                </span>
+              )}
+            </Link>
+
+            {/* Cart Icon */}
+            <Link
+              to="/cart"
+              className="relative p-2.5 rounded-2xl text-slate-600 hover:text-blue-600 hover:bg-slate-50 transition"
+              title="Shopping Cart"
+            >
+              <ShoppingBag size={22} />
+              {totalCartCount > 0 && (
+                <span className="absolute top-1 right-1 bg-blue-600 text-white text-[10px] font-extrabold rounded-full w-5 h-5 flex items-center justify-center border-2 border-white shadow-sm">
+                  {totalCartCount}
+                </span>
+              )}
+            </Link>
+
+            <div className="h-6 w-px bg-slate-200 mx-1"></div>
+
+            {/* User Account / Profile */}
+            {isLoggedIn ? (
+              <div className="relative">
+                <button
+                  onClick={() => setUserDropdown(!userDropdown)}
+                  className="flex items-center gap-2.5 p-1.5 pr-3 rounded-2xl hover:bg-slate-50 border border-slate-200/80 transition cursor-pointer"
                 >
-                  <Heart size={24} />
-                  {wishlistCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {wishlistCount}
-                    </span>
-                  )}
-                </Link>
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center">
+                    {(user?.name || 'U').charAt(0).toUpperCase()}
+                  </div>
+                  <div className="text-left text-xs">
+                    <p className="font-bold text-slate-900 line-clamp-1">{user?.name?.split(' ')[0]}</p>
+                    <p className="text-[10px] text-slate-400 font-mono">{user?.role || 'USER'}</p>
+                  </div>
+                </button>
 
-                <Link
-                  to="/cart"
-                  className="relative flex items-center text-gray-700 hover:text-blue-600 transition"
-                >
-                  <ShoppingCart size={24} />
-                  {cartCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {cartCount}
-                    </span>
-                  )}
-                </Link>
+                {/* Dropdown Menu */}
+                {userDropdown && (
+                  <div className="absolute right-0 mt-3 w-56 bg-white rounded-3xl shadow-xl border border-slate-200 p-2 space-y-1 z-50 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="px-3 py-2 border-b border-slate-100">
+                      <p className="font-bold text-slate-900 text-sm">{user?.name}</p>
+                      <p className="text-xs text-slate-400 truncate">{user?.email}</p>
+                    </div>
 
-                <div className="flex items-center gap-2">
-                  <User size={20} />
-                  <span className="text-sm font-medium">{user?.name?.split(' ')[0]}</span>
-                </div>
-
-                <div className="relative group">
-                  <button className="text-gray-700 hover:text-blue-600">
-                    <User size={24} />
-                  </button>
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto">
                     <Link
                       to="/profile"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 first:rounded-t-lg"
+                      onClick={() => setUserDropdown(false)}
+                      className="block px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 rounded-xl transition"
                     >
-                      My Profile
+                      👤 My Profile & Addresses
                     </Link>
                     <Link
                       to="/orders"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      onClick={() => setUserDropdown(false)}
+                      className="block px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 rounded-xl transition"
                     >
-                      Order History
+                      📦 Order History & Invoices
                     </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 last:rounded-b-lg flex items-center gap-2"
+                    <Link
+                      to="/wishlist"
+                      onClick={() => setUserDropdown(false)}
+                      className="block px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 rounded-xl transition"
                     >
-                      <LogOut size={18} />
-                      Logout
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
+                      ❤️ Saved Wishlist
+                    </Link>
+                    <Link
+                      to="/admin"
+                      onClick={() => setUserDropdown(false)}
+                      className="block px-3 py-2 text-sm font-semibold text-blue-600 hover:bg-blue-50 rounded-xl transition"
+                    >
+                      🛡️ Admin Dashboard
+                    </Link>
 
-            {!isLoggedIn && (
-              <div className="flex gap-3">
+                    <div className="pt-1 border-t border-slate-100">
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-3 py-2 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition flex items-center gap-2 cursor-pointer"
+                      >
+                        <LogOut size={16} /> Logout
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
                 <Link
                   to="/login"
-                  className="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition"
+                  className="px-4 py-2 text-xs font-bold text-slate-700 hover:text-blue-600 rounded-xl transition"
                 >
-                  Login
+                  Sign In
                 </Link>
                 <Link
                   to="/register"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                  className="px-4 py-2 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md shadow-blue-500/25 transition"
                 >
                   Register
                 </Link>
@@ -134,70 +191,111 @@ export function Navbar({ cartCount, wishlistCount, onSearch }: NavbarProps) {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden text-gray-700"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
-          </button>
+          {/* Mobile Menu Toggle */}
+          <div className="flex md:hidden items-center gap-3">
+            <Link to="/cart" className="relative p-2 text-slate-700">
+              <ShoppingBag size={22} />
+              {totalCartCount > 0 && (
+                <span className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                  {totalCartCount}
+                </span>
+              )}
+            </Link>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 text-slate-700 hover:text-slate-900 rounded-xl focus:outline-none"
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="md:hidden pb-4 border-t border-gray-200">
-            <form onSubmit={handleSearch} className="mb-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                />
-                <button type="submit" className="absolute right-3 top-2.5">
-                  <Search size={20} />
-                </button>
-              </div>
+          <div className="md:hidden pb-6 pt-2 border-t border-slate-100 space-y-4">
+            <form onSubmit={handleSearch} className="relative">
+              <Search size={16} className="absolute left-3.5 top-3 text-slate-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search catalog..."
+                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
             </form>
 
-            {isLoggedIn && (
-              <div className="space-y-2">
-                <Link
-                  to="/wishlist"
-                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded"
-                >
-                  ❤️ Wishlist ({wishlistCount})
-                </Link>
-                <Link to="/cart" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">
-                  🛒 Cart ({cartCount})
-                </Link>
-                <Link to="/profile" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">
-                  👤 My Profile
-                </Link>
-                <Link to="/orders" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">
-                  📋 Order History
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 rounded"
-                >
-                  Logout
-                </button>
-              </div>
-            )}
+            <div className="space-y-1 font-semibold text-sm text-slate-700">
+              <Link
+                to="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-xl hover:bg-slate-50"
+              >
+                🏠 Home
+              </Link>
+              <Link
+                to="/search"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-xl hover:bg-slate-50"
+              >
+                🛍️ Browse Catalog
+              </Link>
+              <Link
+                to="/cart"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-xl hover:bg-slate-50"
+              >
+                🛒 Shopping Cart ({totalCartCount})
+              </Link>
+              <Link
+                to="/wishlist"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-xl hover:bg-slate-50"
+              >
+                ❤️ Saved Wishlist ({wishlistItems.length})
+              </Link>
+              <Link
+                to="/orders"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-xl hover:bg-slate-50"
+              >
+                📦 Track & Orders
+              </Link>
+              <Link
+                to="/profile"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-xl hover:bg-slate-50"
+              >
+                👤 My Account
+              </Link>
+              <Link
+                to="/admin"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-xl hover:bg-blue-50 text-blue-600 font-bold"
+              >
+                🛡️ Admin Panel
+              </Link>
+            </div>
 
-            {!isLoggedIn && (
-              <div className="space-y-2">
+            {isLoggedIn ? (
+              <button
+                onClick={handleLogout}
+                className="w-full text-left px-3 py-2 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition flex items-center gap-2"
+              >
+                <LogOut size={16} /> Logout ({user?.email})
+              </button>
+            ) : (
+              <div className="grid grid-cols-2 gap-2 pt-2">
                 <Link
                   to="/login"
-                  className="block px-4 py-2 text-center text-blue-600 border border-blue-600 rounded hover:bg-blue-50"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full text-center py-2.5 text-xs font-bold border border-slate-200 rounded-xl"
                 >
                   Login
                 </Link>
                 <Link
                   to="/register"
-                  className="block px-4 py-2 text-center bg-blue-600 text-white rounded hover:bg-blue-700"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full text-center py-2.5 text-xs font-bold bg-blue-600 text-white rounded-xl"
                 >
                   Register
                 </Link>

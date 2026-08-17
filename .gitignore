@@ -21,3 +21,15 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# C++ build artifacts
+EcartSystem/backend/build/
+*.obj
+*.ilk
+*.pdb
+*.tlog
+*.recipe
+*.lastbuildstate
+*.exe
+*.lib
+*.dll
